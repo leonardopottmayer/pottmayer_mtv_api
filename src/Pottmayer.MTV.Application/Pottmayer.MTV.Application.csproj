@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>85007fcc-4607-4edf-b869-b2f1405fbe23</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pottmayer.MTV.Adapter.Authorization\Pottmayer.MTV.Adapter.Authorization.csproj" />
+    <ProjectReference Include="..\Pottmayer.MTV.Adapter.Cache\Pottmayer.MTV.Adapter.Cache.csproj" />
+    <ProjectReference Include="..\Pottmayer.MTV.Adapter.Data\Pottmayer.MTV.Adapter.Data.csproj" />
+    <ProjectReference Include="..\Pottmayer.MTV.Adapter.Rest\Pottmayer.MTV.Adapter.Rest.csproj" />
+    <ProjectReference Include="..\Pottmayer.MTV.Adapter.UserProvider\Pottmayer.MTV.Adapter.UserProvider.csproj" />
+    <ProjectReference Include="..\Pottmayer.MTV.Core.Domain\Pottmayer.MTV.Core.Domain.csproj" />
+    <ProjectReference Include="..\Pottmayer.MTV.Core.Logic\Pottmayer.MTV.Core.Logic.csproj" />
+  </ItemGroup>
+
+</Project>

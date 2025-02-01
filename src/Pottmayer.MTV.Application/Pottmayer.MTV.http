@@ -1,0 +1,6 @@
+@Pottmayer.MTV_HostAddress = http://localhost:5078
+
+GET {{Pottmayer.MTV_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
