@@ -5,6 +5,7 @@ using Pottmayer.MTV.Core.Domain.Modules.Phrases.Cqrs;
 using Pottmayer.MTV.Core.Domain.Modules.Phrases.Dtos.Logic;
 using Pottmayer.MTV.Core.Domain.Modules.Phrases.Entities;
 using Tars.Contracts.Adapter.Cache;
+using Tars.Contracts.Cqrs;
 using Tars.Core.Cqrs;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
@@ -20,7 +21,7 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
             _cacheService = cacheService;
         }
 
-        protected override async Task<GetAllPhrasesOutputDto> HandleAsync(GetAllPhrasesCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<GetAllPhrasesOutputDto>> HandleAsync(GetAllPhrasesCommand request, CancellationToken cancellationToken)
         {
             bool cacheExists = _cacheService.Exists(KnownCacheKeys.ALL_PHRASES);
 
@@ -36,7 +37,7 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
                 _cacheService.Set(KnownCacheKeys.ALL_PHRASES, allPhrases, TimeSpan.FromMinutes(1));
             }
 
-            return new GetAllPhrasesOutputDto() { Phrases = allPhrases };
+            return Success(new GetAllPhrasesOutputDto() { Phrases = allPhrases });
         }
     }
 }

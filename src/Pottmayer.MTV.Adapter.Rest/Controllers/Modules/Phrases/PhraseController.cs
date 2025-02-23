@@ -9,6 +9,7 @@ using Pottmayer.MTV.Core.Domain.Modules.Phrases.Dtos.Rest;
 using Tars.Adapter.Rest.Controllers;
 using Tars.Adapter.Rest.Extensions;
 using System.Dynamic;
+using Pottmayer.MTV.Core.Domain.Modules.Phrases.Entities;
 
 namespace Pottmayer.MTV.Adapter.Rest.Controllers.Modules.Phrases
 {
@@ -33,7 +34,7 @@ namespace Pottmayer.MTV.Adapter.Rest.Controllers.Modules.Phrases
             var cmd = new GetAllPhrasesCommand();
             var result = await _mediator.Send(cmd);
 
-            return Ok(new GetAllPhrasesResponseDto() { Phrases = _mapper.Map<List<PhraseDto>>(result.Phrases.Where(p => p.IsVisible)) })
+            return Ok(new GetAllPhrasesResponseDto() { Phrases = _mapper.Map<List<PhraseDto>>(result.Output?.Phrases.Where(p => p.IsVisible)) })
                   .WithSuccessIndicator(true);
         }
 
@@ -44,7 +45,7 @@ namespace Pottmayer.MTV.Adapter.Rest.Controllers.Modules.Phrases
             var cmd = new GetRandomPhraseCommand();
             var result = await _mediator.Send(cmd);
 
-            return Ok(new GetRandomPhraseResponseDto() { Phrase = _mapper.Map<PhraseDto>(result.Phrase) })
+            return Ok(new GetRandomPhraseResponseDto() { Phrase = _mapper.Map<PhraseDto>(result.Output?.Phrase) })
                   .WithSuccessIndicator(true);
         }
 
@@ -57,11 +58,11 @@ namespace Pottmayer.MTV.Adapter.Rest.Controllers.Modules.Phrases
             var result = await _mediator.Send(cmd);
 
             if (result.Success)
-                return Ok(new CreatePhraseResponseDto() { CreatedPhrase = _mapper.Map<PhraseDto>(result.CreatedPhrase) })
+                return Ok(new CreatePhraseResponseDto() { CreatedPhrase = _mapper.Map<PhraseDto>(result.Output?.CreatedPhrase) })
                       .WithSuccessIndicator(true);
 
             return UnprocessableEntity(new CreatePhraseResponseDto() { CreatedPhrase = null })
-                  .WithMessage(string.Join("; ", result.Errors))
+                  .WithMessage(string.Join("; ", result.Message))
                   .WithSuccessIndicator(false);
         }
 
@@ -81,7 +82,7 @@ namespace Pottmayer.MTV.Adapter.Rest.Controllers.Modules.Phrases
 
             return UnprocessableEntity(new { })
                   .WithSuccessIndicator(false)
-                  .WithMessage(result.ErrorMessage ?? string.Empty);
+                  .WithMessage(result.Message ?? string.Empty);
         }
 
         [Authorize]
@@ -98,7 +99,7 @@ namespace Pottmayer.MTV.Adapter.Rest.Controllers.Modules.Phrases
 
             return UnprocessableEntity(new { })
                   .WithSuccessIndicator(false)
-                  .WithMessage(result.ErrorMessage ?? string.Empty);
+                  .WithMessage(result.Message ?? string.Empty);
         }
 
         [Authorize]

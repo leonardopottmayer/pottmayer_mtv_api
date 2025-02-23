@@ -2,11 +2,13 @@
 using Pottmayer.MTV.Adapter.Data.Impl;
 using Pottmayer.MTV.Core.Domain.Modules.Auth.Cqrs;
 using Pottmayer.MTV.Core.Domain.Modules.Auth.Dtos.Logic;
+using Pottmayer.MTV.Core.Domain.Modules.Users.Dtos;
 using Pottmayer.MTV.Core.Domain.Modules.Users.Entities;
+using System.Security.Claims;
 using Tars.Contracts.Adapter.Authorization;
 using Tars.Contracts.Adapter.Authorization.Dtos;
+using Tars.Contracts.Cqrs;
 using Tars.Core.Cqrs;
-using System.Security.Claims;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
 {
@@ -26,20 +28,20 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
             _passwordHasher = passwordHasher;
         }
 
-        protected override async Task<LoginUserOutputDto> HandleAsync(LoginUserCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<LoginUserOutputDto>> HandleAsync(LoginUserCommand request, CancellationToken cancellationToken)
         {
             User? foundUser = await FindUser(request.Input.Username, request.Input.Email, cancellationToken);
             if (foundUser is null)
-                return MountOutputDto(false, INVALID_USERNAME_OR_PASSWORD_MESSAGE, null);
+                return Fail(null, INVALID_USERNAME_OR_PASSWORD_MESSAGE);
 
             bool isPasswordValid = _passwordHasher.VerifyPassword(request.Input.Password, foundUser.PasswordSalt, foundUser.Password);
             if (!isPasswordValid)
-                return MountOutputDto(false, INVALID_USERNAME_OR_PASSWORD_MESSAGE, null);
+                return Fail(null, INVALID_USERNAME_OR_PASSWORD_MESSAGE);
 
             ICollection<AuthTicketClaimDto> claims = BuildUserClaims(foundUser);
             IAuthTicket authTicket = _authService.CreateAuthTicket(claims, Convert.ToString(foundUser.Id));
 
-            return MountOutputDto(true, null, authTicket);
+            return Success(new LoginUserOutputDto() { AuthTicket = authTicket });
         }
 
         protected async Task<User?> FindUser(string? username, string? email, CancellationToken cancellationToken)
@@ -62,34 +64,37 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
             {
                 new AuthTicketClaimDto()
                 {
-                    ClaimName = nameof(User.Id),
+                    ClaimName = nameof(UserDataDto.Id),
                     ClaimType = ClaimValueTypes.String,
                     ClaimValue = Convert.ToString(user.Id)
                 },
                 new AuthTicketClaimDto()
                 {
-                    ClaimName = nameof(User.Username),
+                    ClaimName = nameof(UserDataDto.Username),
                     ClaimType = ClaimValueTypes.String,
                     ClaimValue = Convert.ToString(user.Username)
                 },
                 new AuthTicketClaimDto()
                 {
-                    ClaimName = nameof(User.Email),
+                    ClaimName = nameof(UserDataDto.Email),
                     ClaimType = ClaimValueTypes.String,
                     ClaimValue = Convert.ToString(user.Email)
                 },
                 new AuthTicketClaimDto()
                 {
-                    ClaimName = nameof(User.Role),
+                    ClaimName = nameof(UserDataDto.Role),
                     ClaimType = ClaimValueTypes.Integer32,
                     ClaimValue = Convert.ToString((int)user.Role)
+                },
+                new AuthTicketClaimDto()
+                {
+                    ClaimName = nameof(UserDataDto.Name),
+                    ClaimType = ClaimValueTypes.String,
+                    ClaimValue = Convert.ToString(user.Name)
                 }
             };
 
             return claims;
         }
-
-        protected LoginUserOutputDto MountOutputDto(bool success, string? message, IAuthTicket? authTicket)
-            => new LoginUserOutputDto() { Success = success, Message = message, AuthTicket = authTicket };
     }
 }

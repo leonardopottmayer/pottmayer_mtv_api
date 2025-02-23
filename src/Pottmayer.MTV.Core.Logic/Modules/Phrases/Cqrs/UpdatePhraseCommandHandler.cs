@@ -5,12 +5,13 @@ using Pottmayer.MTV.Core.Domain.Modules.Phrases.Cqrs;
 using Pottmayer.MTV.Core.Domain.Modules.Phrases.Dtos.Logic;
 using Pottmayer.MTV.Core.Domain.Modules.Phrases.Entities;
 using Pottmayer.MTV.Core.Domain.Modules.Users.Dtos;
+using Pottmayer.MTV.Core.Domain.Modules.Users.Enums;
+using System.Dynamic;
 using Tars.Contracts.Adapter.Cache;
 using Tars.Contracts.Adapter.UserProvider;
+using Tars.Contracts.Cqrs;
 using Tars.Core.Cqrs;
 using Tars.Core.Utils;
-using System.Dynamic;
-using Pottmayer.MTV.Core.Domain.Modules.Users.Enums;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
 {
@@ -32,47 +33,23 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
             _cacheService = cacheService;
         }
 
-        protected override async Task<UpdatePhraseOutputDto> HandleAsync(UpdatePhraseCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<UpdatePhraseOutputDto>> HandleAsync(UpdatePhraseCommand request, CancellationToken cancellationToken)
         {
             if (_userProvider!.User?.Role != UserRole.Admin)
-            {
-                return new UpdatePhraseOutputDto()
-                {
-                    Success = false,
-                    ErrorMessage = NO_PERMISSION_MESSAGE
-                };
-            }
+                return Fail(new UpdatePhraseOutputDto() { }, NO_PERMISSION_MESSAGE);
 
             if (request.Input.PhraseData is null)
-            {
-                return new UpdatePhraseOutputDto()
-                {
-                    Success = false,
-                    ErrorMessage = PHRASE_DATA_EMPTY_MESSAGE
-                };
-            }
+                return Fail(new UpdatePhraseOutputDto() { }, PHRASE_DATA_EMPTY_MESSAGE);
 
             Phrase? phrase = await _dbContext.Phrases.FirstOrDefaultAsync(p => p.Id == request.Input.PhraseId);
 
             if (phrase is null)
-            {
-                return new UpdatePhraseOutputDto()
-                {
-                    Success = false,
-                    ErrorMessage = PHRASE_NOT_FOUND_MESSAGE
-                };
-            }
+                return Fail(new UpdatePhraseOutputDto() { }, PHRASE_NOT_FOUND_MESSAGE);
 
             Phrase? mergedPhrase = MergeIncomingAndCurrentPhrase(request.Input, phrase, request.Input.PhraseData);
 
             if (mergedPhrase is null)
-            {
-                return new UpdatePhraseOutputDto()
-                {
-                    Success = false,
-                    ErrorMessage = FAILED_TO_UPDATE_PHRASE_MESSAGE
-                };
-            }
+                return Fail(new UpdatePhraseOutputDto() { }, FAILED_TO_UPDATE_PHRASE_MESSAGE);
 
             mergedPhrase.UpdatedBy = _userProvider.User?.Id is not null ? _userProvider.User.Id : KnownUserCodes.SYSTEM_USER_CODE;
             mergedPhrase.UpdatedAt = DateTime.UtcNow;
@@ -82,7 +59,7 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
 
             _cacheService.Remove(KnownCacheKeys.ALL_PHRASES);
 
-            return new UpdatePhraseOutputDto() { Success = true };
+            return Success(new UpdatePhraseOutputDto() { });
         }
 
         protected Phrase? MergeIncomingAndCurrentPhrase(UpdatePhraseInputDto incoming, Phrase current, ExpandoObject expando)

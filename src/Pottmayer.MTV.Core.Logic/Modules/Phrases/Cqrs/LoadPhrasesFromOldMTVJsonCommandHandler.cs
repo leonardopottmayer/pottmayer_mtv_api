@@ -7,6 +7,7 @@ using Pottmayer.MTV.Core.Domain.Modules.Users.Dtos;
 using Pottmayer.MTV.Core.Domain.Modules.Users.Enums;
 using Tars.Contracts.Adapter.Cache;
 using Tars.Contracts.Adapter.UserProvider;
+using Tars.Contracts.Cqrs;
 using Tars.Core.Cqrs;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
@@ -24,15 +25,10 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
             _cacheService = cacheService;
         }
 
-        protected override async Task<LoadPhrasesFromOldMTVJsonOutputDto> HandleAsync(LoadPhrasesFromOldMTVJsonCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<LoadPhrasesFromOldMTVJsonOutputDto>> HandleAsync(LoadPhrasesFromOldMTVJsonCommand request, CancellationToken cancellationToken)
         {
             if (_userProvider!.User?.Role != UserRole.Admin)
-            {
-                return new LoadPhrasesFromOldMTVJsonOutputDto()
-                {
-                    Success = false,
-                };
-            }
+                return Fail(new LoadPhrasesFromOldMTVJsonOutputDto() { });
 
             foreach (LoadPhrasesFromOldMTVJsonItemDto item in request.Input.Phrases)
             {
@@ -54,7 +50,7 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
 
             _cacheService.Remove(KnownCacheKeys.ALL_PHRASES);
 
-            return new LoadPhrasesFromOldMTVJsonOutputDto() { Success = true };
+            return Success(new LoadPhrasesFromOldMTVJsonOutputDto() { });
         }
     }
 }

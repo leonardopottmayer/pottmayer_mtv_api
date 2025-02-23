@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="Tars.Core" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,17 +1,21 @@
-﻿using Autofac;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
 using Tars.Adapter.Rest.DI;
 using Tars.Contracts.Adapter.Rest.Response;
-using System.Text.Json;
 
 namespace Pottmayer.MTV.Adapter.Rest.DI
 {
     public static class RestAdapterDI
     {
-        public static ContainerBuilder ConfigureMTVRestAdapter(this ContainerBuilder builder)
+        public static IHostApplicationBuilder ConfigureMTVRestAdapter(this IHostApplicationBuilder builder)
         {
-            builder.ConfigureResponseWrapper<DefaultApiResponse<object>>();
+            builder.ConfigureTarsRestAdapter();
+
+            builder.Services.ConfigureMTVRestAdapterControllers();
+            builder.Services.AddResponseWrappingMiddleware<DefaultApiResponse<object>>();
+
             return builder;
         }
 

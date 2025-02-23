@@ -1,13 +1,13 @@
-﻿using Autofac;
+﻿using Microsoft.Extensions.Hosting;
 using Tars.Adapter.UserProvider.DI;
 
 namespace Pottmayer.MTV.Adapter.UserProvider.DI
 {
     public static class UserProviderAdapterDI
     {
-        public static ContainerBuilder ConfigureMTVUserProviderAdapter(this ContainerBuilder builder)
+        public static IHostApplicationBuilder ConfigureMTVUserProviderAdapter(this IHostApplicationBuilder builder)
         {
-            builder.ConfigureUserProvider();
+            builder.ConfigureTarsUserProviderAdapter();
             return builder;
         }
     }

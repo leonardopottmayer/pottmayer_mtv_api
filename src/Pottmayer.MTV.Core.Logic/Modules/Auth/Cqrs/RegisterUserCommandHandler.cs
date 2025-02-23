@@ -3,10 +3,11 @@ using Pottmayer.MTV.Adapter.Data.Impl;
 using Pottmayer.MTV.Core.Domain.Modules.Auth.Cqrs;
 using Pottmayer.MTV.Core.Domain.Modules.Auth.Dtos.Logic;
 using Pottmayer.MTV.Core.Domain.Modules.Users.Entities;
-using Tars.Contracts.Adapter.Authorization;
-using Tars.Core.Cqrs;
-using System.Text.RegularExpressions;
 using Pottmayer.MTV.Core.Domain.Modules.Users.Enums;
+using System.Text.RegularExpressions;
+using Tars.Contracts.Adapter.Authorization;
+using Tars.Contracts.Cqrs;
+using Tars.Core.Cqrs;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
 {
@@ -31,25 +32,25 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
             _passwordHasher = passwordHasher;
         }
 
-        protected override async Task<RegisterUserOutputDto> HandleAsync(RegisterUserCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<RegisterUserOutputDto>> HandleAsync(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             bool usernameInUse = await UsernameIsAlreadyInUse(request.Input.Username);
             if (usernameInUse)
-                return MountOutputDto(false, string.Format(ALREADY_IN_USE_MESSAGE, "Username"), null);
+                return Fail(new RegisterUserOutputDto() { }, string.Format(ALREADY_IN_USE_MESSAGE, "Username"));
 
             bool emailInUse = await EmailIsAlreadyInUse(request.Input.Email);
             if (emailInUse)
-                return MountOutputDto(false, string.Format(ALREADY_IN_USE_MESSAGE, "Username"), null);
+                return Fail(new RegisterUserOutputDto() { }, string.Format(ALREADY_IN_USE_MESSAGE, "E-mail"));
 
             var (isPasswordValid, passwordValidationMessage) = IsPasswordValid(request.Input.Password, request.Input.PasswordConfirmation);
             if (!isPasswordValid)
-                return MountOutputDto(false, passwordValidationMessage, null);
+                return Fail(new RegisterUserOutputDto() { }, passwordValidationMessage);
 
             User? insertedUser = await CreateUser(request.Input);
             if (insertedUser is null)
-                return MountOutputDto(false, FAILED_TO_REGISTER_USER_MESSAGE, null);
+                return Fail(new RegisterUserOutputDto() { }, FAILED_TO_REGISTER_USER_MESSAGE);
 
-            return MountOutputDto(true, null, insertedUser);
+            return Fail(new RegisterUserOutputDto() { User = insertedUser });
         }
 
         protected async Task<User?> CreateUser(RegisterUserInputDto input)
@@ -102,8 +103,5 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
 
             return (true, null);
         }
-
-        protected RegisterUserOutputDto MountOutputDto(bool success, string? message, User? user)
-            => new RegisterUserOutputDto() { Success = success, Message = message, User = user };
     }
 }

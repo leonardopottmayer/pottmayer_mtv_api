@@ -8,6 +8,7 @@ using Pottmayer.MTV.Core.Domain.Modules.Users.Dtos;
 using Pottmayer.MTV.Core.Domain.Modules.Users.Enums;
 using Tars.Contracts.Adapter.Cache;
 using Tars.Contracts.Adapter.UserProvider;
+using Tars.Contracts.Cqrs;
 using Tars.Core.Cqrs;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
@@ -28,26 +29,16 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
             _userProvider = userProvider;
         }
 
-        protected override async Task<DeletePhraseOutputDto> HandleAsync(DeletePhraseCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<DeletePhraseOutputDto>> HandleAsync(DeletePhraseCommand request, CancellationToken cancellationToken)
         {
             if (_userProvider!.User?.Role != UserRole.Admin)
-            {
-                return new DeletePhraseOutputDto()
-                {
-                    Success = false,
-                    ErrorMessage = NO_PERMISSION_MESSAGE
-                };
-            }
+                return Fail(new DeletePhraseOutputDto() { }, NO_PERMISSION_MESSAGE);
 
             Phrase? phrase = await _dbContext.Phrases.FirstOrDefaultAsync(p => p.Id == request.Input.PhraseId);
 
             if (phrase is null)
             {
-                return new DeletePhraseOutputDto()
-                {
-                    Success = false,
-                    ErrorMessage = PHRASE_NOT_FOUND_MESSAGE
-                };
+                return Fail(new DeletePhraseOutputDto() { }, PHRASE_NOT_FOUND_MESSAGE);
             }
 
             _dbContext.Phrases.Remove(phrase);
@@ -55,7 +46,7 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
 
             _cacheService.Remove(KnownCacheKeys.ALL_PHRASES);
 
-            return new DeletePhraseOutputDto() { Success = true };
+            return Success(new DeletePhraseOutputDto() { });
         }
     }
 }

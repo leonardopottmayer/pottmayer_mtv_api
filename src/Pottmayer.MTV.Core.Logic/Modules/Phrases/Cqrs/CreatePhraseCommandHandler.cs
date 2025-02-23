@@ -7,6 +7,7 @@ using Pottmayer.MTV.Core.Domain.Modules.Users.Dtos;
 using Pottmayer.MTV.Core.Domain.Modules.Users.Enums;
 using Tars.Contracts.Adapter.Cache;
 using Tars.Contracts.Adapter.UserProvider;
+using Tars.Contracts.Cqrs;
 using Tars.Core.Cqrs;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
@@ -15,6 +16,7 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
     {
         protected const string EMPTY_DESCRIPTION_MESSAGE = "Description cannot be empty.";
         protected const string NO_PERMISSION_MESSAGE = "Only admin users can create phrases.";
+        protected const string FAILED_TO_CREATE_PHRASE_MESSAGE = "Failed to create phrase.";
 
         protected readonly AppDbContext _dbContext;
         protected readonly IUserProvider<UserDataDto> _userProvider;
@@ -27,28 +29,24 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
             _cacheService = cacheService;
         }
 
-        protected override async Task<CreatePhraseOutputDto> HandleAsync(CreatePhraseCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<CreatePhraseOutputDto>> HandleAsync(CreatePhraseCommand request, CancellationToken cancellationToken)
         {
             if (_userProvider!.User?.Role != UserRole.Admin)
             {
-                return new CreatePhraseOutputDto()
+                return Fail(new CreatePhraseOutputDto()
                 {
                     CreatedPhrase = null,
-                    Success = false,
-                    Errors = [NO_PERMISSION_MESSAGE]
-                };
+                }, NO_PERMISSION_MESSAGE);
             }
 
             try
             {
                 if (string.IsNullOrEmpty(request.Input.Description))
                 {
-                    return new CreatePhraseOutputDto()
+                    return Fail(new CreatePhraseOutputDto()
                     {
                         CreatedPhrase = null,
-                        Success = false,
-                        Errors = [EMPTY_DESCRIPTION_MESSAGE]
-                    };
+                    }, EMPTY_DESCRIPTION_MESSAGE);
                 }
 
                 var newPhrase = new Phrase()
@@ -67,20 +65,17 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
 
                 _cacheService.Remove(KnownCacheKeys.ALL_PHRASES);
 
-                return new CreatePhraseOutputDto()
+                return Success(new CreatePhraseOutputDto()
                 {
-                    Success = true,
                     CreatedPhrase = newPhrase
-                };
+                });
             }
             catch (Exception)
             {
-                return new CreatePhraseOutputDto()
+                return Fail(new CreatePhraseOutputDto()
                 {
-                    Success = false,
                     CreatedPhrase = null,
-                    Errors = new List<string>() { "Failed to create phrase." }
-                };
+                }, FAILED_TO_CREATE_PHRASE_MESSAGE);
             }
         }
     }

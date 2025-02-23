@@ -51,7 +51,7 @@ namespace Pottmayer.MTV.Adapter.Rest.Controllers.Modules.Auth
             var result = await _mediator.Send(cmd);
 
             if (result.Success)
-                return Ok(new LoginUserResponseDto() { JwtToken = result.AuthTicket?.JwtToken ?? string.Empty })
+                return Ok(new LoginUserResponseDto() { JwtToken = result.Output?.AuthTicket?.JwtToken ?? string.Empty })
                       .WithSuccessIndicator(true);
 
             return UnprocessableEntity(new { }).WithMessage(result.Message ?? "Failed to authenticate.");

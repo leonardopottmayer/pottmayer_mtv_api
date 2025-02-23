@@ -1,15 +1,15 @@
-﻿using Autofac;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Tars.Adapter.Authorization.DI;
 
 namespace Pottmayer.MTV.Adapter.Authorization.DI
 {
     public static class AuthorizationAdapterDI
     {
-        public static ContainerBuilder ConfigureMTVAuthorizationAdapter(this ContainerBuilder builder)
+        public static IHostApplicationBuilder ConfigureMTVAuthorizationAdapter(this IHostApplicationBuilder builder)
         {
-            builder.ConfigurePasswordHasher()
-                   .ConfigureAuthService()
-                   .ConfigureAuthorizationMiddlewareResultHandler();
+            builder.ConfigureTarsAuthorizationAdapter();
+            builder.Services.AddAuthorization();
 
             return builder;
         }

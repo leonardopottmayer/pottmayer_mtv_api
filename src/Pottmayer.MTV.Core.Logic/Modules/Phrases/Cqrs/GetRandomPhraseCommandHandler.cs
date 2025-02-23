@@ -2,6 +2,7 @@
 using Pottmayer.MTV.Core.Domain.Modules.Phrases.Cqrs;
 using Pottmayer.MTV.Core.Domain.Modules.Phrases.Dtos.Logic;
 using Pottmayer.MTV.Core.Domain.Modules.Phrases.Entities;
+using Tars.Contracts.Cqrs;
 using Tars.Core.Cqrs;
 
 namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
@@ -15,17 +16,19 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
             _mediator = mediator;
         }
 
-        protected override async Task<GetRandomPhraseOutputDto> HandleAsync(GetRandomPhraseCommand request, CancellationToken cancellationToken)
+        protected override async Task<ICommandResult<GetRandomPhraseOutputDto>> HandleAsync(GetRandomPhraseCommand request, CancellationToken cancellationToken)
         {
             var getAllPhrasesCmd = new GetAllPhrasesCommand();
-            GetAllPhrasesOutputDto getAllPhrasesCmdResult = await _mediator.Send(getAllPhrasesCmd);
+            ICommandResult<GetAllPhrasesOutputDto> getAllPhrasesCmdResult = await _mediator.Send(getAllPhrasesCmd);
 
-            Phrase? randomPhrase = getAllPhrasesCmdResult.Phrases
+            Phrase? randomPhrase = getAllPhrasesCmdResult.Output?.Phrases
                 .Where(p => p.IsVisible == true)
                 .OrderBy(p => Guid.NewGuid())
                 .FirstOrDefault();
 
-            return new GetRandomPhraseOutputDto() { Success = randomPhrase is not null, Phrase = randomPhrase };
+            return randomPhrase is not null
+                ? Success(new GetRandomPhraseOutputDto() { Phrase = randomPhrase })
+                : Fail(new GetRandomPhraseOutputDto() { });
         }
     }
 }
