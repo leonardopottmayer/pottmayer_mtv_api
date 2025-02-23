@@ -16,12 +16,12 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
     {
         protected const string INVALID_USERNAME_OR_PASSWORD_MESSAGE = "Invalid username or password.";
 
-        protected readonly AppDbContext _dbContext;
+        protected readonly IAppDbContext _dbContext;
 
         protected readonly IAuthService _authService;
         protected readonly IPasswordHasher _passwordHasher;
 
-        public LoginUserCommandHandler(AppDbContext dbContext, IAuthService authService, IPasswordHasher passwordHasher)
+        public LoginUserCommandHandler(IAppDbContext dbContext, IAuthService authService, IPasswordHasher passwordHasher)
         {
             _dbContext = dbContext;
             _authService = authService;

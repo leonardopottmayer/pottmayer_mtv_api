@@ -18,11 +18,11 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
         protected const string NO_PERMISSION_MESSAGE = "Only admin users can create phrases.";
         protected const string FAILED_TO_CREATE_PHRASE_MESSAGE = "Failed to create phrase.";
 
-        protected readonly AppDbContext _dbContext;
+        protected readonly IAppDbContext _dbContext;
         protected readonly IUserProvider<UserDataDto> _userProvider;
         protected readonly ICacheService _cacheService;
 
-        public CreatePhraseCommandHandler(AppDbContext dbContext, IUserProvider<UserDataDto> userProvider, ICacheService cacheService)
+        public CreatePhraseCommandHandler(IAppDbContext dbContext, IUserProvider<UserDataDto> userProvider, ICacheService cacheService)
         {
             _dbContext = dbContext;
             _userProvider = userProvider;

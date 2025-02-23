@@ -22,11 +22,11 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
         protected const string FAILED_TO_UPDATE_PHRASE_MESSAGE = "Failed to update phrase.";
         protected const string NO_PERMISSION_MESSAGE = "Only admin users can update phrases.";
 
-        protected readonly AppDbContext _dbContext;
+        protected readonly IAppDbContext _dbContext;
         protected readonly IUserProvider<UserDataDto> _userProvider;
         protected readonly ICacheService _cacheService;
 
-        public UpdatePhraseCommandHandler(AppDbContext dbContext, IUserProvider<UserDataDto> userProvider, ICacheService cacheService)
+        public UpdatePhraseCommandHandler(IAppDbContext dbContext, IUserProvider<UserDataDto> userProvider, ICacheService cacheService)
         {
             _dbContext = dbContext;
             _userProvider = userProvider;

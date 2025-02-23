@@ -20,12 +20,12 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Auth.Cqrs
         protected const string PASSWORDS_DO_NOT_MATCH_MESSAGE = "Passwords do not match.";
         protected const string PASSWORDS_ARE_NOT_STRONG_ENOUGH_MESSAGE = "Password is not strong enough.";
 
-        protected readonly AppDbContext _dbContext;
+        protected readonly IAppDbContext _dbContext;
 
         protected readonly IAuthService _authService;
         protected readonly IPasswordHasher _passwordHasher;
 
-        public RegisterUserCommandHandler(AppDbContext dbContext, IAuthService authService, IPasswordHasher passwordHasher)
+        public RegisterUserCommandHandler(IAppDbContext dbContext, IAuthService authService, IPasswordHasher passwordHasher)
         {
             _dbContext = dbContext;
             _authService = authService;

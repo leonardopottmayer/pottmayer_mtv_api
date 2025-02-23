@@ -31,9 +31,9 @@ namespace Pottmayer.MTV.Adapter.Data.DI
             return builder;
         }
 
-        public static IServiceCollection ConfigureDbContext<TDbContext>(this IServiceCollection serviceCollection) where TDbContext : DbContext
+        public static IServiceCollection ConfigureDbContext<TDbContext>(this IServiceCollection services) where TDbContext : DbContext
         {
-            serviceCollection.AddDbContext<TDbContext>((sp, options) =>
+            services.AddDbContext<TDbContext>((sp, options) =>
             {
                 var dataConfigResolver = sp.GetRequiredService<IDataConfigResolver>();
                 DataConfig dataConfig = dataConfigResolver.Resolve();
@@ -41,7 +41,9 @@ namespace Pottmayer.MTV.Adapter.Data.DI
                 options.UseNpgsql(dataConfig.ConnectionString);
             });
 
-            return serviceCollection;
+            services.AddDbContextAbstraction<IAppDbContext, AppDbContext>();
+
+            return services;
         }
     }
 }

@@ -4,7 +4,7 @@ using Pottmayer.MTV.Core.Domain.Modules.Users.Entities;
 
 namespace Pottmayer.MTV.Adapter.Data.Impl
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }

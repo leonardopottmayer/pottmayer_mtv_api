@@ -18,11 +18,11 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
         protected const string PHRASE_NOT_FOUND_MESSAGE = "Phrase not found.";
         protected const string NO_PERMISSION_MESSAGE = "Only admin users can delete phrases.";
 
-        protected readonly AppDbContext _dbContext;
+        protected readonly IAppDbContext _dbContext;
         protected readonly ICacheService _cacheService;
         protected readonly IUserProvider<UserDataDto> _userProvider;
 
-        public DeletePhraseCommandHandler(AppDbContext dbContext, ICacheService cacheService, IUserProvider<UserDataDto> userProvider)
+        public DeletePhraseCommandHandler(IAppDbContext dbContext, ICacheService cacheService, IUserProvider<UserDataDto> userProvider)
         {
             _dbContext = dbContext;
             _cacheService = cacheService;

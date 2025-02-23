@@ -12,10 +12,10 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
 {
     public class GetAllPhrasesCommandHandler : AbstractCommandHandler<GetAllPhrasesCommand, GetAllPhrasesOutputDto>, IGetAllPhrasesCommandHandler
     {
-        protected readonly AppDbContext _dbContext;
+        protected readonly IAppDbContext _dbContext;
         protected readonly ICacheService _cacheService;
 
-        public GetAllPhrasesCommandHandler(AppDbContext dbContext, ICacheService cacheService)
+        public GetAllPhrasesCommandHandler(IAppDbContext dbContext, ICacheService cacheService)
         {
             _dbContext = dbContext;
             _cacheService = cacheService;
@@ -33,7 +33,7 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
             }
             else
             {
-                allPhrases = await _dbContext.Phrases.ToListAsync();
+                allPhrases = await _dbContext.Phrases.AsNoTracking().ToListAsync();
                 _cacheService.Set(KnownCacheKeys.ALL_PHRASES, allPhrases, TimeSpan.FromMinutes(1));
             }
 

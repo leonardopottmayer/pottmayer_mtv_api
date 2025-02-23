@@ -14,11 +14,11 @@ namespace Pottmayer.MTV.Core.Logic.Modules.Phrases.Cqrs
 {
     public class LoadPhrasesFromOldMTVJsonCommandHandler : AbstractCommandHandler<LoadPhrasesFromOldMTVJsonCommand, LoadPhrasesFromOldMTVJsonOutputDto>, ILoadPhrasesFromOldMTVJsonCommandHandler
     {
-        protected readonly AppDbContext _dbContext;
+        protected readonly IAppDbContext _dbContext;
         protected readonly IUserProvider<UserDataDto> _userProvider;
         protected readonly ICacheService _cacheService;
 
-        public LoadPhrasesFromOldMTVJsonCommandHandler(AppDbContext dbContext, IUserProvider<UserDataDto> userProvider, ICacheService cacheService)
+        public LoadPhrasesFromOldMTVJsonCommandHandler(IAppDbContext dbContext, IUserProvider<UserDataDto> userProvider, ICacheService cacheService)
         {
             _dbContext = dbContext;
             _userProvider = userProvider;
